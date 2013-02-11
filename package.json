@@ -1,0 +1,14 @@
+{
+  "name": "fluent-logger-stream",
+  "version": "0.0.1",
+  "description": "Stream-based Fluentd logger for Node.js",
+  "author": "Chunjong Park <cjpark87@gmail.com>",
+  "main": "./lib/logger.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cjpark87/fluent-logger-nodejs.git"
+  },
+  "engines": "node >=0.6.0",
+  "keywords": ["fluent", "fluentd", "logger", "stream"],
+  "license": "MIT"
+}
