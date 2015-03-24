@@ -1,8 +1,11 @@
 var test = require('tape'),
     debug = require('debug')('fluent-logger-nodejs');
 
-var net = require('net'),
-    http = require('http');
+var fs = require('fs'),
+    path = require('path'),
+    net = require('net'),
+    http = require('http'),
+    https = require('https');
 
 var Logger = require('../lib/logger');
 
@@ -59,3 +62,32 @@ test('HTTP', function(t){
 
 });
 
+test('HTTPS', function(t){
+    t.plan(1);
+
+    var port = 8443;
+
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    var server = https.createServer({
+        key: fs.readFileSync(path.join(__dirname, 'fixtures', 'certs', 'server', 'my-server.key.pem')),
+        cert: fs.readFileSync(path.join(__dirname, 'fixtures', 'certs', 'server', 'my-server.crt.pem'))
+    }, function(req, res){
+        debug('https/client connected');
+        debug('https/server unbinding');
+        req.on('end', function(){
+            debug('https/server we done!')
+            server.close(function(){
+                debug('https/server unbound');
+                t.end();
+            });
+        });
+        res.end();
+    });
+
+    server.listen(port, function(){
+        debug('https/server bound');
+        var logger = new Logger({ type: 'http', protocol: 'https', port: port });
+        logger.info({ message: 'foo' });
+    });
+
+});
