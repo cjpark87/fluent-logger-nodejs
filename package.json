@@ -9,6 +9,18 @@
     "url": "https://github.com/cjpark87/fluent-logger-nodejs.git"
   },
   "engines": "node >=0.6.0",
-  "keywords": ["fluent", "fluentd", "logger", "stream"],
-  "license": "MIT"
+  "keywords": [
+    "fluent",
+    "fluentd",
+    "logger",
+    "stream"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "debug": "^2.1.3",
+    "tape": "^3.5.0"
+  },
+  "scripts": {
+    "test": "tape test/*-test.js"
+  }
 }
