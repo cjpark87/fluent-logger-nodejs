@@ -5,10 +5,13 @@ var test = require('tape'),
 var fs = require('fs'),
     path = require('path'),
     net = require('net'),
+    tls = require('tls'),
     http = require('http'),
     https = require('https');
 
 var Logger = require('../lib/logger');
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 test('TCP Forwarding', function(t){
     t.plan(1);
@@ -28,6 +31,34 @@ test('TCP Forwarding', function(t){
         debug('tcp/server bound');
         t.doesNotThrow(function(){
             var logger = new Logger({ port: port });
+            logger.info(logData);
+            logger.end();
+        });
+    });
+
+});
+
+test('Secure TCP Forwarding', function(t){
+    t.plan(1);
+
+    var port = 24225,
+        logData = { message: 'foo' };
+
+    var server = tls.createServer({
+        key: fs.readFileSync(path.join(__dirname, 'fixtures', 'certs', 'server', 'my-server.key.pem')),
+        cert: fs.readFileSync(path.join(__dirname, 'fixtures', 'certs', 'server', 'my-server.crt.pem'))
+    }, function(socket){
+        socket.on('data', function(d){}).on('end', function(){
+            debug('tls/server unbinding');
+            server.close(function(){
+                debug('tls/server unbound');
+                t.end();
+            });
+        });
+    }).listen(port, '127.0.0.1', function(){
+        debug('tls/server bound');
+        t.doesNotThrow(function(){
+            var logger = new Logger({ type: 'secure_forward', port: port });
             logger.info(logData);
             logger.end();
         });
@@ -74,7 +105,6 @@ test('HTTPS', function(t){
     var port = 8443,
         logData = { message: 'foo' };
 
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     var server = https.createServer({
         key: fs.readFileSync(path.join(__dirname, 'fixtures', 'certs', 'server', 'my-server.key.pem')),
         cert: fs.readFileSync(path.join(__dirname, 'fixtures', 'certs', 'server', 'my-server.crt.pem'))
